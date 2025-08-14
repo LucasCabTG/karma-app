@@ -1,7 +1,9 @@
-// Archivo: src/lib/firebase.ts
+// Archivo: src/lib/firebase.ts (Actualizado)
 
-import { initializeApp, getApps } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+// 1. Importamos la función para obtener la autenticación
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -12,11 +14,11 @@ const firebaseConfig = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-// Inicializa Firebase
-// Verificamos si ya hay apps inicializadas para no crear duplicados
+// Usamos getApp() para evitar re-inicializar en el lado del servidor
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
-
-// Exportamos el servicio de Firestore para usarlo en otras partes de la app
 const db = getFirestore(app);
+// 2. Inicializamos el servicio de autenticación
+const auth = getAuth(app);
 
-export { db };
+// 3. Exportamos todo para usarlo en la app
+export { db, auth };

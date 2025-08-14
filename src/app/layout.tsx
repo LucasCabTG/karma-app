@@ -1,21 +1,28 @@
-// Archivo: src/app/layout.tsx (MODIFICADO)
+// Archivo: src/app/layout.tsx
 
 import type { Metadata } from "next";
-// 1. Cambiamos la fuente que importamos a Montserrat
-import { Montserrat } from "next/font/google";
+import { Montserrat } from "next/font/google"; // Asumo que seguimos con Montserrat
 import "./globals.css";
+import { Footer } from "@/components/layout/Footer"; // 1. Importar el Footer
 
-// 2. Configuramos Montserrat con los grosores que necesitamos
-const montserrat = Montserrat({ 
-  subsets: ["latin"],
-  weight: ['300', '400', '700', '800'] // Agregamos '800' para el font-extrabold de la otra página
-});
 
-// 3. Actualizamos la metadata para que sea de KARMA
+const montserrat = Montserrat({ subsets: ["latin"] });
+
 export const metadata: Metadata = {
-  title: "KARMA",
-  description: "Lo que vibra, vuelve.",
+  title: "KARMA | Ciclo de Música Electrónica en Rosario",
+  description: "KARMA es un ciclo de música electrónica que sigue el ciclo de la naturaleza. Un evento por cada estación del año. Conseguí tus entradas para la próxima edición.",
+  keywords: ["fiesta electrónica rosario", "música electrónica", "progressive house", "techno", "entradas", "evento", "Karma"],
+  openGraph: {
+    title: "KARMA | Lo que vibra, vuelve.",
+    description: "Un ciclo de música que celebra la conexión entre los sentidos y el arte en cada estación del año.",
+    url: "https://KarmaSeason.com", 
+    siteName: "KARMA Season",
+
+    locale: 'es_AR',
+    type: 'website',
+  },
 };
+
 
 export default function RootLayout({
   children,
@@ -23,10 +30,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // 4. Cambiamos el idioma a español
-    <html lang="es">
-      {/* 5. Aplicamos la clase de Montserrat al body. Borramos lo de geist. */}
-      <body className={montserrat.className}>{children}</body>
+    <html lang="es" className="scroll-smooth">
+      {/* Añadimos el fondo negro aquí */}
+      <body className={`${montserrat.className} bg-black text-white`}>
+        {children}
+        <Footer /> {/* 2. Agregar el Footer aquí */}
+
+      </body>
     </html>
   );
 }
