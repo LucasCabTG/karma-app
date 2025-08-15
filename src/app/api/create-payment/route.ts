@@ -2,8 +2,8 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
-import { db } from '@/lib/firebase-admin'; // Asegurate que importe desde firebase-admin
-import { FieldValue } from 'firebase-admin/firestore'; // Importamos FieldValue para el incremento
+import { db } from '@/lib/firebase-admin';
+import { FieldValue } from 'firebase-admin/firestore';
 
 const TICKET_PRICE = 12000;
 
@@ -11,12 +11,8 @@ export async function POST(req: NextRequest) {
   try {
     const { name, email, quantity } = await req.json();
 
-    let ticketId: string;
-    let preferenceId: string;
-    let init_point: string;
-
-    // Iniciamos una transacción segura de Firestore
-    await db.runTransaction(async (transaction) => {
+    // 1. La transacción ahora devolverá el ID del ticket.
+    const ticketId = await db.runTransaction(async (transaction) => {
       const configRef = db.collection('config').doc('evento_actual');
       const configDoc = await transaction.get(configRef);
 
@@ -31,22 +27,25 @@ export async function POST(req: NextRequest) {
         throw new Error(`¡Sold Out! Solo quedan ${entradasDisponibles} entradas.`);
       }
 
-      // Creamos el ticket PENDIENTE dentro de la transacción
-      const ticketRef = db.collection("tickets").doc(); // Creamos una referencia a un nuevo documento
-      transaction.set(ticketRef, {
+      const newTicketRef = db.collection("tickets").doc();
+      transaction.set(newTicketRef, {
         comprador: name,
         email: email,
         quantity: quantity,
         fechaCompra: FieldValue.serverTimestamp(),
         status: 'pending'
       });
-      ticketId = ticketRef.id;
 
-      // Actualizamos el contador de forma segura
       transaction.update(configRef, { entradasVendidas: FieldValue.increment(quantity) });
+      
+      // 2. Devolvemos el ID al final de la transacción exitosa.
+      return newTicketRef.id;
     });
 
-    // Si la transacción fue exitosa, procedemos a crear el pago en Mercado Pago
+    if (!ticketId) {
+      throw new Error("La creación del ticket falló después de la transacción.");
+    }
+    
     const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN! });
     const preference = new Preference(client);
 
@@ -54,7 +53,7 @@ export async function POST(req: NextRequest) {
       body: {
         items: [
           {
-            id: ticketId!,
+            id: ticketId,
             title: `x${quantity} Entrada(s) KARMA Vol. 1`,
             quantity: quantity,
             unit_price: TICKET_PRICE,
@@ -67,23 +66,23 @@ export async function POST(req: NextRequest) {
           failure: `${process.env.BASE_URL}/failure`,
           pending: `${process.env.BASE_URL}/pending`
         },
-        external_reference: ticketId!,
+        external_reference: ticketId,
       },
     });
 
-    preferenceId = preferenceResponse.id!;
-    init_point = preferenceResponse.init_point!;
+    const preferenceId = preferenceResponse.id!;
+    const init_point = preferenceResponse.init_point!;
 
-    // Actualizamos el ticket con el ID de la preferencia de MP
-    const finalTicketRef = db.collection('tickets').doc(ticketId!);
+    const finalTicketRef = db.collection('tickets').doc(ticketId);
     await finalTicketRef.update({
       preference_id: preferenceId
     });
     
     return NextResponse.json({ url: init_point });
 
-  } catch (error: any) {
-    console.error('Error al crear la preferencia de pago:', error.message);
-    return new NextResponse(error.message, { status: 400 });
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
+    console.error('Error al crear la preferencia de pago:', errorMessage);
+    return new NextResponse(errorMessage, { status: 400 });
   }
 }

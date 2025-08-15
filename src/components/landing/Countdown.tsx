@@ -4,13 +4,11 @@
 import { useEffect, useState, useCallback } from 'react';
 
 export function Countdown() {
-  // La fecha objetivo de nuestra fiesta
   const targetDate = new Date('2025-09-20T22:00:00');
 
-  // Función para calcular el tiempo restante
-  const calculateTimeLeft = () => {
+  const calculateTimeLeft = useCallback(() => {
     const difference = +targetDate - +new Date();
-    let timeLeft = {};
+    let timeLeft: { [key: string]: number } = {};
 
     if (difference > 0) {
       timeLeft = {
@@ -20,25 +18,21 @@ export function Countdown() {
         segundos: Math.floor((difference / 1000) % 60),
       };
     }
-
     return timeLeft;
-  };
+  }, [targetDate]);
 
-  // Estado para guardar y actualizar el tiempo restante
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
   useEffect(() => {
-    // Creamos un temporizador que actualiza el estado cada segundo
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
-    // Limpiamos el temporizador cuando el componente se desmonta para evitar problemas de memoria
     return () => clearInterval(timer);
   }, [calculateTimeLeft]);
 
   return (
-    <section className="bg-black py-20 px-4 text-white">
+    <section id="countdown" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
         <h2 className="text-4xl font-bold">Vol. 1 PRIMAVERA</h2>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
