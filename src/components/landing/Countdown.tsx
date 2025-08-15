@@ -1,7 +1,7 @@
 // Archivo: src/components/landing/Countdown.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 
 export function Countdown() {
   // La fecha objetivo de nuestra fiesta
@@ -35,7 +35,7 @@ export function Countdown() {
 
     // Limpiamos el temporizador cuando el componente se desmonta para evitar problemas de memoria
     return () => clearInterval(timer);
-  }, []);
+  }, [calculateTimeLeft]);
 
   return (
     <section className="bg-black py-20 px-4 text-white">

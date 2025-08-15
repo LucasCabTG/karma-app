@@ -1,6 +1,6 @@
 // Archivo: src/lib/firebase.ts (Actualizado)
 
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 // 1. Importamos la función para obtener la autenticación
 import { getAuth } from "firebase/auth";

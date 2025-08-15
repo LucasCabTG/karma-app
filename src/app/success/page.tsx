@@ -4,6 +4,7 @@
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/Navbar';
+import Link from 'next/link'; // 1. Importar Link
 
 function SuccessContent() {
   const searchParams = useSearchParams();
@@ -41,15 +42,19 @@ function SuccessContent() {
 
   return (
     <div className="flex flex-col items-center gap-4 rounded-lg bg-gray-900 p-8 text-center">
-      <h2 className={`text-3xl font-bold ${isError ? 'text-red-500' : 'text-green-400'}`}>
-        {isError ? 'Hubo un Problema' : '¡Gracias por tu compra!'}
-      </h2>
-      <p className="text-gray-300">{message}</p>
-      <a href="/" className="mt-4 rounded-lg bg-white px-6 py-3 font-bold text-black">
+      <h2 className="text-3xl font-bold text-green-400">¡Compra Exitosa!</h2>
+      <p className="text-gray-300">
+        Hemos confirmado tu compra de <span className="font-bold text-white">{/*...*/}</span> entrada(s).
+        <br />
+        En instantes recibirás un email con tus códigos QR individuales.
+      </p>
+      {/* 2. Reemplazar <a> por <Link> */}
+      <Link href="/" className="mt-4 rounded-lg bg-white px-6 py-3 font-bold text-black">
         Volver al inicio
-      </a>
+      </Link>
     </div>
   );
+
 }
 
 export default function SuccessPage() {

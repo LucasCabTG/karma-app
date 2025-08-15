@@ -8,7 +8,6 @@ const TICKET_PRICE = 12000;
 export async function POST(req: NextRequest) {
   try {
     const { name, email, quantity } = await req.json();
-    const configRef = doc(db, 'config', 'evento_actual');
 
     const ticketRef = await addDoc(collection(db, "tickets"), {
       comprador: name,
