@@ -16,6 +16,10 @@ export function Hero() {
         <p className="mt-4 text-xl text-gray-400 md:text-2xl">
           LO QUE VIBRA, VUELVE.
         </p>
+        <p className="mt-4 text-xl text-gray-400 md:text-2xl">
+Vol. 1: Primavera | 20.09.2025
+
+        </p>
       </div>
     </section>
   );    

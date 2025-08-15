@@ -75,6 +75,9 @@ export function TicketForm() {
       >
         {isLoading ? 'Procesando...' : `Pagar ${quantity * TICKET_PRICE} ARS`}
       </button>
+      <p className="mt-4 text-lg text-gray-400">
+          Una vez finalizada la compra volver a la pagina para recibir tu ticket
+        </p>
     </form>
   );
 }

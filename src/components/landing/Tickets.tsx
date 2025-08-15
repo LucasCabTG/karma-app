@@ -9,6 +9,7 @@ export function Tickets() {
         <p className="mt-4 text-lg text-gray-400">
           Asegurá tu lugar en la próxima edición de KARMA.
         </p>
+        
         <TicketForm />
       </div>
     </section>
