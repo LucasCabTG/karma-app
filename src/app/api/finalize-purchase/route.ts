@@ -78,8 +78,12 @@ export async function POST(req: NextRequest) {
     
     return NextResponse.json({ success: true, message: 'Email enviado' });
 
-  } catch (error: any) {
+  } catch (error) { // Quitamos el ': any'
     console.error('Error al finalizar la compra:', error);
-    return new NextResponse(error.message, { status: 500 });
+    // Verificamos si el error es una instancia de Error para acceder a .message
+    if (error instanceof Error) {
+      return new NextResponse(error.message, { status: 500 });
+    }
+    return new NextResponse('Ocurrió un error desconocido', { status: 500 });
   }
 }

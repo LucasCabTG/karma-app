@@ -21,13 +21,19 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password);
       // Si el login es exitoso, redirigimos al escáner
       router.push('/admin/scanner');
-    } catch (err: any) {
+    } catch (err) { // Quitamos el ': any'
+    // Verificamos si el error tiene una propiedad 'code'
+    if (err && typeof err === 'object' && 'code' in err) {
       console.error("Error de autenticación:", err.code);
       if (err.code === 'auth/invalid-credential') {
         setError("Email o contraseña incorrectos.");
       } else {
         setError("Ocurrió un error. Intentá de nuevo.");
       }
+    } else {
+      // Si es un error genérico
+      setError("Ocurrió un error inesperado.");
+    }
     }
   };
 
