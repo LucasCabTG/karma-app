@@ -19,10 +19,9 @@ const djs = [
   {
     name: 'COLOÜ BEFU (Closing)',
     description: 'Una selección de 21 tracks curada por COLOÜ BEFU para KARMA. En esta playlist el DJ captura la energía del progressive con la vibra de la primavera: renacimiento, cambio, luz. Forma parte de una propuesta colaborativa donde cada DJ construye su propio universo sonoro...(proximamente)',
-    spotifyUrl: 'https://open.spotify.com/embed/playlist/{playlist-id}' // <-- REEMPLAZAR CON URL REAL 
+    spotifyUrl: 'https://open.spotify.com/embed/playlist/0iRO78mYTl8Kdwe7ln4Dsx?utm_source=generator' // <-- REEMPLAZAR CON URL REAL 
   },
 ];
-
 export function Music() {
   // 2. Configuramos el hook del carrusel
   const [emblaRef, emblaApi] = useEmblaCarousel({ loop: true });
