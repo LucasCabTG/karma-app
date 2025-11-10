@@ -9,7 +9,7 @@ const djs = [
     {
     name: 'COTY M (Opening)',
     description: 'Una selección de 21 tracks curada por COTY M para KARMA. En esta playlist el DJ captura la energía del progressive con la vibra de la primavera: renacimiento, cambio, luz. Forma parte de una propuesta colaborativa donde cada DJ construye su propio universo sonoro...(proximamente)',
-    spotifyUrl: 'https://open.spotify.com/embed/playlist/{playlist-id}' // <-- REEMPLAZAR CON URL REAL
+    spotifyUrl: 'https://open.spotify.com/embed/playlist/1EUgCGz9Kb4gwYVZ3cE1oU?utm_source=generator&theme=0' // <-- REEMPLAZAR CON URL REAL
   },
   {
     name: 'ELOY V (Warm Up)',
@@ -39,9 +39,9 @@ export function Music() {
   return (
     <section id="music" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl font-bold">La Vibración de la Primavera</h2>
+        <h2 className="text-4xl font-bold">Recordá el Sonido de la Primavera</h2>
         <p className="mt-4 text-lg text-gray-400">
-          Tres artistas, tres momentos. Descubrí el sonido que definirá nuestra primera noche.
+          Reviví los sets que definieron nuestra primera noche mientras esperamos que llegue el Vol. 2: Verano.
         </p>
       </div>
 
@@ -92,6 +92,8 @@ export function Music() {
     </section>
   );
 }
+
+
 
 
 

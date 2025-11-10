@@ -1,4 +1,6 @@
 // Archivo: src/components/landing/Hero.tsx
+'use client';
+
 import { Monoton } from 'next/font/google';
 
 const monoton = Monoton({
@@ -16,11 +18,12 @@ export function Hero() {
         <p className="mt-4 text-xl text-gray-400 md:text-2xl">
           LO QUE VIBRA, VUELVE.
         </p>
-        <p className="mt-4 text-xl text-gray-400 md:text-2xl">
-Vol. 1: Primavera | 20.09.2025
 
+        <p className="mt-8 text-xl font-light text-gray-300">
+          Vol. 2: Verano | 20.12.2025
         </p>
+
       </div>
     </section>
-  );    
+  );
 }
