@@ -6,10 +6,8 @@ import { useEffect, useState } from 'react';
 import { Html5Qrcode } from 'html5-qrcode';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+// No necesitamos 'signOut' ni 'auth' aquí
 
-// 1. Agregamos un nuevo estado para tickets vencidos
 type TicketStatus = 'VALIDO' | 'USADO' | 'NO_ENCONTRADO' | 'VENCIDO' | 'ESCANEANDO' | 'ERROR' | 'DETENIDO';
 
 export default function ScannerPage() {
@@ -44,15 +42,11 @@ export default function ScannerPage() {
       if (ticketSnap.exists()) {
         const ticketData = ticketSnap.data();
         
-        // 2. LÓGICA DE VERIFICACIÓN DE EVENTO
         if (ticketData.evento !== 2) {
-          // Si no es del evento 2 (es del 1 o no tiene), se rechaza
           setTicketStatus('VENCIDO');
         } else if (ticketData.asistio) {
-          // Si es del evento 2 pero ya se usó
           setTicketStatus('USADO');
         } else {
-          // Si es del evento 2 y no se usó
           await updateDoc(ticketRef, { asistio: true });
           setTicketStatus('VALIDO');
         }
@@ -79,7 +73,7 @@ export default function ScannerPage() {
         selectedCameraId,
         { fps: 10, qrbox: { width: 250, height: 250 } },
         onScanSuccess,
-        (errorMessage) => {}
+        () => {} // <-- CORRECCIÓN: Función vacía sin parámetro 'errorMessage'
       ).catch(err => {
         console.error("Error al iniciar el scanner:", err);
         setTicketStatus('ERROR');
@@ -96,12 +90,12 @@ export default function ScannerPage() {
     }
   };
   
+  // La función handleLogout ya no está aquí, vive en la Navbar
   
   const getStatusStyle = () => {
     switch (ticketStatus) {
       case 'VALIDO': return 'bg-green-500';
       case 'USADO': return 'bg-yellow-500';
-      // 3. Agregamos el color para el ticket vencido
       case 'VENCIDO': return 'bg-orange-500'; 
       case 'NO_ENCONTRADO':
       case 'ERROR': return 'bg-red-500';
@@ -111,6 +105,7 @@ export default function ScannerPage() {
 
   return (
     <div className="flex min-h-screen flex-col items-center gap-4 bg-gray-900 p-4 text-white">
+      {/* Ya no hay botón de Logout aquí */}
       <h1 className="mt-8 text-4xl font-bold">Escaner KARMA</h1>
       
       <div 

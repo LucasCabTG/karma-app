@@ -19,12 +19,10 @@ export default function ConfigPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   
-  // Estados para el nuevo formulario de creación
   const [newLoteName, setNewLoteName] = useState('');
   const [newLotePrice, setNewLotePrice] = useState(0);
   const [newLoteLimit, setNewLoteLimit] = useState(0);
 
-  // Cargar todos los datos al iniciar
   const fetchConfig = async () => {
     setLoading(true);
     const configRef = doc(db, 'config', 'evento_actual');
@@ -44,29 +42,23 @@ export default function ConfigPage() {
     fetchConfig();
   }, []);
 
-  // Función para guardar el lote activo (ya la tenías)
   const handleSetLoteActivo = async () => {
     setMessage('Guardando...');
     const configRef = doc(db, 'config', 'evento_actual');
     try {
       await updateDoc(configRef, { loteActivo: Number(loteActivo) });
       setMessage('¡Lote activo guardado!');
-    } catch (err) {
+    } catch { // <-- CORRECCIÓN: Quitamos '(err)' porque no se usa
       setMessage('Error al guardar.');
     }
   };
 
-  // --- NUEVAS FUNCIONES DE EDICIÓN ---
-
-  // 1. Función para manejar cambios en los inputs de los lotes existentes
   const handleLoteFieldChange = (index: number, field: keyof Lote, value: string | number) => {
     const updatedLotes = [...lotes];
-    // TypeScript necesita esta conversión
     (updatedLotes[index] as any)[field] = value;
     setLotes(updatedLotes);
   };
 
-  // 2. Función para guardar los cambios de un lote específico en Firestore
   const handleSaveLote = async (loteId: string, index: number) => {
     setMessage(`Guardando ${lotes[index].nombre}...`);
     const loteRef = doc(db, 'config', 'evento_actual', 'lotes', loteId);
@@ -78,16 +70,19 @@ export default function ConfigPage() {
         limite: Number(limite)
       });
       setMessage(`¡${nombre} actualizado!`);
-    } catch (err) {
+    } catch (err) { // <-- CORRECCIÓN: Verificamos el tipo de error
       console.error(err);
-      setMessage(`Error al actualizar ${nombre}.`);
+      if (err instanceof Error) {
+        setMessage(`Error al actualizar ${nombre}: ${err.message}`);
+      } else {
+        setMessage(`Error al actualizar ${nombre}.`);
+      }
     }
   };
 
-  // 3. Función para crear un nuevo lote
   const handleCreateLote = async (e: React.FormEvent) => {
     e.preventDefault();
-    const newLoteId = String(lotes.length + 1); // Asigna el ID siguiente (ej. "3")
+    const newLoteId = String(lotes.length + 1);
     setMessage(`Creando Lote ${newLoteId}...`);
     
     const loteRef = doc(db, 'config', 'evento_actual', 'lotes', newLoteId);
@@ -99,14 +94,17 @@ export default function ConfigPage() {
         vendidas: 0
       });
       setMessage(`¡Lote ${newLoteId} creado!`);
-      // Limpiamos el formulario y recargamos la lista
       setNewLoteName('');
       setNewLotePrice(0);
       setNewLoteLimit(0);
       fetchConfig();
-    } catch (err) {
+    } catch (err) { // <-- CORRECCIÓN: Verificamos el tipo de error
       console.error(err);
-      setMessage('Error al crear el nuevo lote.');
+      if (err instanceof Error) {
+        setMessage(`Error al crear el nuevo lote: ${err.message}`);
+      } else {
+        setMessage('Error al crear el nuevo lote.');
+      }
     }
   };
 
