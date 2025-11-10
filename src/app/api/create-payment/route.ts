@@ -5,14 +5,12 @@ import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 
-const TICKET_PRICE = 12000;
-
 export async function POST(req: NextRequest) {
   try {
     const { name, email, quantity } = await req.json();
 
-    // 1. La transacción ahora devolverá el ID del ticket.
-    const ticketId = await db.runTransaction(async (transaction) => {
+    // 1. La transacción ahora devolverá los valores que necesitamos.
+    const { ticketId, precioLote, loteActualNombre } = await db.runTransaction(async (transaction) => {
       const configRef = db.collection('config').doc('evento_actual');
       const configDoc = await transaction.get(configRef);
 
@@ -20,11 +18,19 @@ export async function POST(req: NextRequest) {
         throw new Error("La configuración del evento no fue encontrada.");
       }
 
-      const { entradasVendidas, limiteEntradas } = configDoc.data()!;
+      const loteActivoNum = configDoc.data()!.loteActivo;
+      const loteRef = db.collection('config').doc('evento_actual').collection('lotes').doc(String(loteActivoNum));
+      const loteDoc = await transaction.get(loteRef);
 
-      if (entradasVendidas + quantity > limiteEntradas) {
-        const entradasDisponibles = limiteEntradas - entradasVendidas;
-        throw new Error(`¡Sold Out! Solo quedan ${entradasDisponibles} entradas.`);
+      if (!loteDoc.exists) {
+        throw new Error(`Configuración para el Lote ${loteActivoNum} no encontrada.`);
+      }
+
+      const { vendidas, limite, precio, nombre } = loteDoc.data()!;
+      
+      if (vendidas + quantity > limite) {
+        const entradasDisponibles = limite - vendidas;
+        throw new Error(`¡Stock Agotado para ${nombre}! Solo quedan ${entradasDisponibles} entradas.`);
       }
 
       const newTicketRef = db.collection("tickets").doc();
@@ -33,18 +39,22 @@ export async function POST(req: NextRequest) {
         email: email,
         quantity: quantity,
         fechaCompra: FieldValue.serverTimestamp(),
-        status: 'pending'
+        status: 'pending',
+        evento: 2,
+        lote: loteActivoNum
       });
 
-      transaction.update(configRef, { entradasVendidas: FieldValue.increment(quantity) });
+      transaction.update(loteRef, { vendidas: FieldValue.increment(quantity) });
       
-      // 2. Devolvemos el ID al final de la transacción exitosa.
-      return newTicketRef.id;
+      // 2. Devolvemos un objeto con los datos que necesitamos fuera de la transacción.
+      return { 
+        ticketId: newTicketRef.id, 
+        precioLote: precio, 
+        loteActualNombre: nombre 
+      };
     });
 
-    if (!ticketId) {
-      throw new Error("La creación del ticket falló después de la transacción.");
-    }
+    // 3. Si llegamos aquí, ticketId, precioLote y loteActualNombre SÍ existen.
     
     const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN! });
     const preference = new Preference(client);
@@ -54,9 +64,9 @@ export async function POST(req: NextRequest) {
         items: [
           {
             id: ticketId,
-            title: `x${quantity} Entrada(s) KARMA Vol. 1`,
+            title: `x${quantity} Entrada(s) KARMA Vol. 2 (${loteActualNombre})`,
             quantity: quantity,
-            unit_price: TICKET_PRICE,
+            unit_price: precioLote, // Usamos el precio dinámico del lote
             currency_id: 'ARS',
           },
         ],
@@ -70,18 +80,17 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // 4. Declaramos estas variables como 'const' aquí, donde se les asigna valor.
     const preferenceId = preferenceResponse.id!;
     const init_point = preferenceResponse.init_point!;
 
     const finalTicketRef = db.collection('tickets').doc(ticketId);
-    await finalTicketRef.update({
-      preference_id: preferenceId
-    });
+    await finalTicketRef.update({ preference_id: preferenceId });
     
     return NextResponse.json({ url: init_point });
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
+    const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error';
     console.error('Error al crear la preferencia de pago:', errorMessage);
     return new NextResponse(errorMessage, { status: 400 });
   }

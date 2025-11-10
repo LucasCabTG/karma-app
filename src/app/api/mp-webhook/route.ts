@@ -38,6 +38,7 @@ export async function POST(req: NextRequest) {
               orderId: ticketId,
               comprador, email, asistio: false,
               fechaGeneracion: FieldValue.serverTimestamp(),
+              evento: 2,
             });
 
             const qrCodeDataURL = await QRCode.toDataURL(individualTicketRef.id);

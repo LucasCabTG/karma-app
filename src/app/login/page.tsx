@@ -20,7 +20,7 @@ export default function LoginPage() {
       // Usamos la función de Firebase para iniciar sesión
       await signInWithEmailAndPassword(auth, email, password);
       // Si el login es exitoso, redirigimos al escáner
-      router.push('/admin/scanner');
+      router.push('/admin/dashboard');
     } catch (err) { // Quitamos el ': any'
     // Verificamos si el error tiene una propiedad 'code'
     if (err && typeof err === 'object' && 'code' in err) {
