@@ -25,17 +25,23 @@ export default function ConfigPage() {
 
   const fetchConfig = async () => {
     setLoading(true);
-    const configRef = doc(db, 'config', 'evento_actual');
-    const configSnap = await getDoc(configRef);
-    if (configSnap.exists()) {
-      setLoteActivo(configSnap.data().loteActivo);
-    }
+    try {
+      const configRef = doc(db, 'config', 'evento_actual');
+      const configSnap = await getDoc(configRef);
+      if (configSnap.exists()) {
+        setLoteActivo(configSnap.data().loteActivo);
+      }
 
-    const lotesRef = collection(db, 'config', 'evento_actual', 'lotes');
-    const lotesSnap = await getDocs(lotesRef);
-    const lotesData = lotesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lote));
-    setLotes(lotesData.sort((a, b) => Number(a.id) - Number(b.id)));
-    setLoading(false);
+      const lotesRef = collection(db, 'config', 'evento_actual', 'lotes');
+      const lotesSnap = await getDocs(lotesRef);
+      const lotesData = lotesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lote));
+      setLotes(lotesData.sort((a, b) => Number(a.id) - Number(b.id)));
+    } catch (error) {
+      console.error(error);
+      setMessage("Error al cargar la configuración.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -48,13 +54,15 @@ export default function ConfigPage() {
     try {
       await updateDoc(configRef, { loteActivo: Number(loteActivo) });
       setMessage('¡Lote activo guardado!');
-    } catch { // <-- CORRECCIÓN: Quitamos '(err)' porque no se usa
+    } catch (err) {
       setMessage('Error al guardar.');
     }
   };
 
   const handleLoteFieldChange = (index: number, field: keyof Lote, value: string | number) => {
     const updatedLotes = [...lotes];
+    // CORRECCIÓN: Deshabilitamos la regla de 'any' solo para esta línea
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (updatedLotes[index] as any)[field] = value;
     setLotes(updatedLotes);
   };
@@ -70,13 +78,9 @@ export default function ConfigPage() {
         limite: Number(limite)
       });
       setMessage(`¡${nombre} actualizado!`);
-    } catch (err) { // <-- CORRECCIÓN: Verificamos el tipo de error
+    } catch (err) {
       console.error(err);
-      if (err instanceof Error) {
-        setMessage(`Error al actualizar ${nombre}: ${err.message}`);
-      } else {
-        setMessage(`Error al actualizar ${nombre}.`);
-      }
+      setMessage(`Error al actualizar ${nombre}.`);
     }
   };
 
@@ -98,13 +102,9 @@ export default function ConfigPage() {
       setNewLotePrice(0);
       setNewLoteLimit(0);
       fetchConfig();
-    } catch (err) { // <-- CORRECCIÓN: Verificamos el tipo de error
+    } catch (err) {
       console.error(err);
-      if (err instanceof Error) {
-        setMessage(`Error al crear el nuevo lote: ${err.message}`);
-      } else {
-        setMessage('Error al crear el nuevo lote.');
-      }
+      setMessage('Error al crear el nuevo lote.');
     }
   };
 

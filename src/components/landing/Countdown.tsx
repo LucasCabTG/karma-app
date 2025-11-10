@@ -4,9 +4,10 @@
 import { useEffect, useState, useCallback } from 'react';
 
 export function Countdown() {
-  const targetDate = new Date('2025-09-20T22:00:00');
 
+  // CORRECCIÓN: 'targetDate' se mueve dentro de useCallback
   const calculateTimeLeft = useCallback(() => {
+    const targetDate = new Date('2025-12-20T23:00:00'); 
     const difference = +targetDate - +new Date();
     let timeLeft: { [key: string]: number } = {};
 
@@ -19,7 +20,7 @@ export function Countdown() {
       };
     }
     return timeLeft;
-  }, [targetDate]);
+  }, []); // CORRECCIÓN: El array de dependencias ahora está vacío
 
   const [timeLeft, setTimeLeft] = useState(calculateTimeLeft());
 
@@ -34,16 +35,20 @@ export function Countdown() {
   return (
     <section id="countdown" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl font-bold">Vol. 1 PRIMAVERA</h2>
+        <h2 className="text-4xl font-bold">Vol. 2 VERANO</h2>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {Object.entries(timeLeft).map(([unit, value]) => (
-            <div key={unit} className="flex flex-col rounded-lg bg-gray-900 p-4">
-              <span className="text-5xl font-bold">
-                {String(value).padStart(2, '0')}
-              </span>
-              <span className="mt-2 text-lg uppercase text-gray-400">{unit}</span>
-            </div>
-          ))}
+          {Object.entries(timeLeft).length > 0 ? (
+            Object.entries(timeLeft).map(([unit, value]) => (
+              <div key={unit} className="flex flex-col rounded-lg bg-gray-900 p-4">
+                <span className="text-5xl font-bold">
+                  {String(value).padStart(2, '0')}
+                </span>
+                <span className="mt-2 text-lg uppercase text-gray-400">{unit}</span>
+              </div>
+            ))
+          ) : (
+            <p className="col-span-4 text-lg text-gray-400">¡La cuenta regresiva comenzará pronto!</p>
+          )}
         </div>
       </div>
     </section>
