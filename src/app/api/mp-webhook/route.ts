@@ -1,4 +1,4 @@
-// Archivo: src/app/api/mp-webhook/route.ts (Versión Corregida)
+// Archivo: src/app/api/mp-webhook/route.ts
 
 import { NextRequest, NextResponse } from 'next/server';
 import { MercadoPagoConfig, Payment } from 'mercadopago';
@@ -6,46 +6,46 @@ import { db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
 import QRCode from 'qrcode';
 import nodemailer from 'nodemailer';
+import { render } from '@react-email/render';
+import { TicketEmail } from '@/emails/TicketEmail';
 
 export const runtime = 'nodejs';
 
-// Esta función manejará el envío de emails
-async function sendTicketEmail(orderData: any, orderId: string) {
+// 1. Definimos la "forma" de los datos de la orden
+interface OrderData {
+  comprador: string;
+  email: string;
+  quantity: number;
+  // ...pueden ir más campos si los necesitás
+}
+
+// 2. Usamos la interfaz en lugar de 'any'
+async function sendTicketEmail(orderData: OrderData, orderId: string) {
   const { comprador, email, quantity } = orderData;
   const attachments = [];
-  let qrHtmlSection = '';
+  const qrCodeImages: string[] = [];
 
   for (let i = 0; i < quantity; i++) {
     const individualTicketRef = await db.collection("individual_tickets").add({
       orderId: orderId,
       comprador, email, asistio: false,
       fechaGeneracion: FieldValue.serverTimestamp(),
-      evento: 2 // Aseguramos que sea del Evento 2
+      evento: 2
     });
     
     const qrCodeDataURL = await QRCode.toDataURL(individualTicketRef.id);
     const cid = `qrcode_${individualTicketRef.id}`;
     
+    qrCodeImages.push(qrCodeDataURL); 
+
     attachments.push({
       filename: `entrada-${i + 1}.png`,
       path: qrCodeDataURL,
-      cid: cid 
+      cid: cid
     });
-
-    qrHtmlSection += `
-      <div style="margin-top: 25px; text-align: center;">
-        <h3 style="color: #333;">Entrada ${i + 1} de ${quantity}</h3>
-        <img src="cid:${cid}" alt="Código QR de la entrada ${i + 1}" style="max-width: 200px;" />
-      </div>`;
   }
 
-  const emailHtml = `
-    <div style="font-family: sans-serif; text-align: center; padding: 20px;">
-      <h1>¡Gracias por tu compra, ${comprador}!</h1>
-      <p>Aquí están tus ${quantity} entrada(s) para KARMA. Presentá estos códigos en la puerta:</p>
-      ${qrHtmlSection}
-      <p>¡Nos vemos en la pista!</p>
-    </div>`;
+  const emailHtml = await render(TicketEmail({ buyerName: comprador, qrCodeImages }));
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -60,21 +60,16 @@ async function sendTicketEmail(orderData: any, orderId: string) {
     to: email,
     subject: 'Tus entradas para KARMA',
     html: emailHtml,
-    attachments: attachments,
+    attachments: attachments, 
   });
 }
-
 
 // Esta es la función principal que recibe la llamada de Mercado Pago
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-
-        console.log("📩 Webhook recibido de Mercado Pago:", JSON.stringify(body, null, 2));
-
     const { action, data } = body;
 
-    // Solo actuamos si es una actualización de pago
     if (action === 'payment.updated') {
       const paymentId = data.id;
 
@@ -82,30 +77,24 @@ export async function POST(req: NextRequest) {
       const payment = new Payment(client);
       const paymentDetails = await payment.get({ id: paymentId });
       
-      // Verificamos que el pago esté aprobado y tenga nuestra referencia
       if (paymentDetails && paymentDetails.status === 'approved' && paymentDetails.external_reference) {
         
         const ticketId = paymentDetails.external_reference;
-        
-        // Usamos la sintaxis correcta del Admin SDK
         const ticketRef = db.collection('tickets').doc(ticketId);
         const ticketDoc = await ticketRef.get();
 
-        // Verificamos que el ticket exista y esté 'pendiente' (para no enviar emails duplicados)
         if (ticketDoc.exists && ticketDoc.data()!.status === 'pending') {
-          
-          // 1. Marcamos la orden como pagada
           await ticketRef.update({ status: 'paid', paymentDetails: paymentDetails });
 
-          // 2. Llamamos a nuestra función para enviar el email
-          await sendTicketEmail(ticketDoc.data()!, ticketId);
+          // 3. Le decimos a TypeScript que los datos coinciden con nuestra interfaz
+          await sendTicketEmail(ticketDoc.data()! as OrderData, ticketId);
         }
       }
     }
     
     return new NextResponse('Webhook procesado', { status: 200 });
 
-  } catch (error) { // <-- CORRECCIÓN AQUÍ
+  } catch (error) { // 4. Corregimos el 'any' del catch
     const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
     console.error('Error en el webhook de Mercado Pago:', errorMessage);
     return new NextResponse(errorMessage, { status: 500 });
