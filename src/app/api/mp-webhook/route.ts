@@ -69,6 +69,9 @@ async function sendTicketEmail(orderData: any, orderId: string) {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
+
+        console.log("📩 Webhook recibido de Mercado Pago:", JSON.stringify(body, null, 2));
+
     const { action, data } = body;
 
     // Solo actuamos si es una actualización de pago

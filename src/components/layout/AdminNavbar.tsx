@@ -21,6 +21,7 @@ export function AdminNavbar() {
     { href: '/admin/dashboard', label: 'Dashboard' },
     { href: '/admin/config', label: 'Gestión de Lotes' },
     { href: '/admin/scanner', label: 'Escaner' },
+    { href: '/admin/courtesy', label: 'Entradas de Cortesía' },
     { href: '/admin/lookup', label: 'Buscador Manual' }, 
   ];
 
