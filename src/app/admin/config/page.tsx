@@ -54,7 +54,7 @@ export default function ConfigPage() {
     try {
       await updateDoc(configRef, { loteActivo: Number(loteActivo) });
       setMessage('¡Lote activo guardado!');
-    } catch (err) {
+    } catch {
       setMessage('Error al guardar.');
     }
   };

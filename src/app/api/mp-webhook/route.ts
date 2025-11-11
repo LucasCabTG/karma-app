@@ -105,9 +105,9 @@ export async function POST(req: NextRequest) {
     
     return new NextResponse('Webhook procesado', { status: 200 });
 
-  } catch (error) {
+  } catch (error) { // <-- CORRECCIÓN AQUÍ
     const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error desconocido';
     console.error('Error en el webhook de Mercado Pago:', errorMessage);
-    return new NextResponse('Error interno', { status: 500 });
+    return new NextResponse(errorMessage, { status: 500 });
   }
 }

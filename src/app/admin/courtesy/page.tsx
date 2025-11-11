@@ -15,19 +15,21 @@ export default function CourtesyPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Estados del formulario
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [quantity, setQuantity] = useState(1);
-  const [selectedLote, setSelectedLote] = useState('99'); // ID del lote de cortesía por defecto
+  const [selectedLote, setSelectedLote] = useState('99');
 
-  // Cargar los lotes para el dropdown
   useEffect(() => {
     const fetchLotes = async () => {
-      const lotesRef = collection(db, 'config', 'evento_actual', 'lotes');
-      const lotesSnap = await getDocs(lotesRef);
-      const lotesData = lotesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lote));
-      setLotes(lotesData);
+      try {
+        const lotesRef = collection(db, 'config', 'evento_actual', 'lotes');
+        const lotesSnap = await getDocs(lotesRef);
+        const lotesData = lotesSnap.docs.map(doc => ({ id: doc.id, ...doc.data() } as Lote));
+        setLotes(lotesData);
+      } catch (error) {
+        console.error("Error al cargar lotes: ", error);
+      }
     };
     fetchLotes();
   }, []);
@@ -61,14 +63,17 @@ export default function CourtesyPage() {
       }
 
       setMessage(`¡Éxito! Se enviaron ${quantity} ticket(s) a ${email}.`);
-      // Limpiar formulario
       setName('');
       setEmail('');
       setQuantity(1);
 
-    } catch (err: any) {
+    } catch (err) { // <-- CORRECCIÓN AQUÍ
       console.error(err);
-      setMessage(`Error: ${err.message}`);
+      if (err instanceof Error) {
+        setMessage(`Error: ${err.message}`);
+      } else {
+        setMessage('Ocurrió un error desconocido.');
+      }
     } finally {
       setIsLoading(false);
     }
