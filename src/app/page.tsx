@@ -14,6 +14,9 @@ export default function LandingPage() {
       <Navbar />
       <Hero />
       <FadeIn>
+        <Tickets />
+      </FadeIn>
+      <FadeIn>
         <Concept />
       </FadeIn>
       <FadeIn>
@@ -21,9 +24,6 @@ export default function LandingPage() {
       </FadeIn>
       <FadeIn>
         <Music /> {/* 2. Añadir la música aquí */}
-      </FadeIn>
-      <FadeIn>
-        <Tickets />
       </FadeIn>
     </main>
   );
