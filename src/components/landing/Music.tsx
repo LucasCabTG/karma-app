@@ -1,26 +1,26 @@
-// Archivo: src/components/landing/Music.tsx (Versión Carrusel)
+// Archivo: src/components/landing/Music.tsx
 'use client';
 
 import useEmblaCarousel from 'embla-carousel-react';
 import { useCallback } from 'react';
 
-// 1. Definimos los datos de nuestros DJs aquí
-const djs = [
-    {
-    name: 'COTY M (Opening)',
-    description: 'Una selección de 21 tracks curada por COTY M para KARMA. En esta playlist el DJ captura la energía del progressive con la vibra de la primavera: renacimiento, cambio, luz. Forma parte de una propuesta colaborativa donde cada DJ construye su propio universo sonoro...(proximamente)',
-    spotifyUrl: 'https://open.spotify.com/embed/playlist/1EUgCGz9Kb4gwYVZ3cE1oU?utm_source=generator&theme=0' // <-- REEMPLAZAR CON URL REAL
-  },
+// 1. Definimos los datos de los Sets de Youtube aquí
+const videos = [
   {
-    name: 'ELOY V (Warm Up)',
-    description: 'Una selección de 21 tracks curada por Eloy V para KARMA. En esta playlist el DJ captura la energía del progressive con la vibra de la primavera: renacimiento, cambio, luz. Forma parte de una propuesta colaborativa donde cada DJ construye su propio universo sonoro...',
-    spotifyUrl: 'https://open.spotify.com/embed/playlist/6o1d3Uj6u36E9vIIvefe74?utm_source=generator&theme=0' // <-- REEMPLAZAR CON URL REAL
+    title: 'Eloy V B2B Cristian Aranda',
+    subtitle: 'Progressive House Set – Summer Edition',
+    description: 'Reviví la magia del Vol. 2. Un B2B increible capturado en nuestro ultimo evento',
+    videoUrl: 'https://www.youtube.com/embed/3vrKX99y0_Q?si=YJ7KGPZkIkA2ln3e' 
   },
+  // CUANDO TENGAS LOS OTROS VIDEOS, COPIA Y PEGA ESTO:
+  /*
   {
-    name: 'COLOÜ BEFU (Closing)',
-    description: 'Una selección de 21 tracks curada por COLOÜ BEFU para KARMA. En esta playlist el DJ captura la energía del progressive con la vibra de la primavera: renacimiento, cambio, luz. Forma parte de una propuesta colaborativa donde cada DJ construye su propio universo sonoro...(proximamente)',
-    spotifyUrl: 'https://open.spotify.com/embed/playlist/0iRO78mYTl8Kdwe7ln4Dsx?utm_source=generator' // <-- REEMPLAZAR CON URL REAL 
+    title: 'NOMBRE DEL DJ',
+    subtitle: 'Summer Edition',
+    description: 'Descripcion breve...',
+    videoUrl: 'URL_DEL_EMBED_DE_YOUTUBE' 
   },
+  */
 ];
 
 export function Music() {
@@ -39,29 +39,32 @@ export function Music() {
   return (
     <section id="music" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl font-bold">Recordá el Sonido de la Primavera</h2>
+        <h2 className="text-4xl font-bold">Recordá el Sonido del Verano</h2>
         <p className="mt-4 text-lg text-gray-400">
-          Reviví los sets que definieron nuestra primera noche mientras esperamos que llegue el Vol. 2: Verano.
+          Reviví los sets que definieron el Vol. 2. La energía de la fiesta, ahora disponible para escuchar donde quieras.
         </p>
       </div>
 
       {/* 4. Estructura del Carrusel */}
-      <div className="embla mx-auto mt-12 max-w-3xl" ref={emblaRef}>
+      <div className="embla mx-auto mt-12 max-w-4xl" ref={emblaRef}>
         <div className="embla__container">
-          {djs.map((dj, index) => (
+          {videos.map((video, index) => (
             <div className="embla__slide p-4" key={index}>
-              <div className="rounded-lg bg-black p-6 text-center">
-                <h3 className="text-3xl font-bold">{dj.name}</h3>
-                <p className="mt-4 text-gray-400">{dj.description}</p>
-                <div className="mt-6">
+              <div className="rounded-xl bg-gray-900/50 p-6 text-center border border-gray-800">
+                <h3 className="text-2xl md:text-3xl font-bold text-white">{video.title}</h3>
+                <h4 className="text-lg text-purple-400 font-medium mb-2">{video.subtitle}</h4>
+                <p className="mb-6 text-sm text-gray-400 max-w-2xl mx-auto">{video.description}</p>
+                
+                {/* Contenedor responsivo para el video 16:9 */}
+                <div className="relative w-full overflow-hidden rounded-lg shadow-lg" style={{ paddingTop: '56.25%' }}>
                   <iframe
-                    style={{ borderRadius: '12px' }}
-                    src={dj.spotifyUrl}
-                    width="100%"
-                    height="152"
+                    className="absolute top-0 left-0 w-full h-full"
+                    src={video.videoUrl}
+                    title={video.title}
                     frameBorder="0"
-                    allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
-                    loading="lazy"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                    referrerPolicy="strict-origin-when-cross-origin"
+                    allowFullScreen
                   ></iframe>
                 </div>
               </div>
@@ -70,30 +73,29 @@ export function Music() {
         </div>
       </div>
 
-      {/* 5. Botones de Navegación */}
-      <div className="mt-6 flex items-center justify-center gap-4">
-  <button 
-    className="embla__prev rounded-full bg-black p-3 text-white border border-gray-700 hover:bg-white hover:text-black transition-colors duration-200" 
-    onClick={scrollPrev}
-  >
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-    </svg>
-  </button>
-  <button 
-    className="embla__next rounded-full bg-black p-3 text-white border border-gray-700 hover:bg-white hover:text-black transition-colors duration-200" 
-    onClick={scrollNext}
-  >
-    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-    </svg>
-  </button>
-</div>
+      {/* 5. Botones de Navegación (Solo se muestran si hay más de 1 video) */}
+      {videos.length > 1 && (
+        <div className="mt-6 flex items-center justify-center gap-4">
+          <button 
+            className="embla__prev rounded-full bg-black p-3 text-white border border-gray-700 hover:bg-white hover:text-black transition-colors duration-200" 
+            onClick={scrollPrev}
+            aria-label="Video anterior"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+          <button 
+            className="embla__next rounded-full bg-black p-3 text-white border border-gray-700 hover:bg-white hover:text-black transition-colors duration-200" 
+            onClick={scrollNext}
+            aria-label="Siguiente video"
+          >
+            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
     </section>
   );
 }
-
-
-
-
-

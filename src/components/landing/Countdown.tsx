@@ -7,7 +7,7 @@ export function Countdown() {
 
   // CORRECCIÓN: 'targetDate' se mueve dentro de useCallback
   const calculateTimeLeft = useCallback(() => {
-    const targetDate = new Date('2025-12-20T23:00:00'); 
+  const targetDate = new Date('2026-03-21T23:59:00-03:00').getTime();
     const difference = +targetDate - +new Date();
     let timeLeft: { [key: string]: number } = {};
 
@@ -35,7 +35,7 @@ export function Countdown() {
   return (
     <section id="countdown" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl font-bold">Vol. 2 VERANO</h2>
+        <h2 className="text-4xl font-bold">Vol. 3 OTOÑO</h2>
         <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Object.entries(timeLeft).length > 0 ? (
             Object.entries(timeLeft).map(([unit, value]) => (

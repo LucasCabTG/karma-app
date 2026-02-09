@@ -20,8 +20,9 @@ export function Hero() {
         </p>
 
         <p className="mt-8 text-xl font-light text-gray-300">
-          Vol. 2: Verano | 20.12.2025
+          Vol. 3: Otoño | 21.03.2026
         </p>
+
 
       </div>
     </section>
