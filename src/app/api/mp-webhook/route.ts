@@ -16,16 +16,19 @@ interface OrderData {
   comprador: string;
   email: string;
   quantity: number;
-  // ...pueden ir más campos si los necesitás
+  lote?: number; 
 }
 
 // 2. Usamos la interfaz en lugar de 'any'
 async function sendTicketEmail(orderData: OrderData, orderId: string) {
-  const { comprador, email, quantity } = orderData;
+  const { comprador, email, quantity, lote } = orderData;
+  const multiplier = (lote === 6) ? 2 : 1;
+  const totalTickets = quantity * multiplier;
+
   const attachments = [];
   const qrCodeImages: string[] = [];
 
-  for (let i = 0; i < quantity; i++) {
+  for (let i = 0; i < totalTickets; i++) {
     const individualTicketRef = await db.collection("individual_tickets").add({
       orderId: orderId,
       comprador, email, asistio: false,

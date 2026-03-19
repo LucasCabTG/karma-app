@@ -33,13 +33,15 @@ export async function POST(req: NextRequest) {
     // Actualizamos la orden a "pagado"
     await orderDoc.ref.update({ status: 'paid' });
     
-    const { comprador, email, quantity } = orderData;
-    
+    const { comprador, email, quantity, lote } = orderData;
+    const multiplier = (lote === 6) ? 2 : 1; 
+    const totalTickets = quantity * multiplier;   
+     
     // --- LÓGICA CORRECTA PARA ADJUNTAR IMÁGENES ---
     const attachments = [];
     let qrHtmlSection = '';
 
-    for (let i = 0; i < quantity; i++) {
+    for (let i = 0; i < totalTickets; i++) {
       // Creamos el ticket individual en la base de datos
       const individualTicketRef = await db.collection("individual_tickets").add({
         orderId: orderDoc.id,
@@ -62,7 +64,7 @@ export async function POST(req: NextRequest) {
       // Creamos el HTML que mostrará la imagen adjunta usando su 'cid'
       qrHtmlSection += `
         <div style="margin-top: 25px; text-align: center;">
-          <h3 style="color: #333;">Entrada ${i + 1} de ${quantity}</h3>
+          <h3 style="color: #333;">Entrada ${i + 1} de ${totalTickets}</h3>
           <img src="cid:${cid}" alt="Código QR de la entrada ${i + 1}" style="max-width: 200px;" />
         </div>`;
     }
@@ -70,7 +72,7 @@ export async function POST(req: NextRequest) {
     const emailHtml = `
       <div style="font-family: sans-serif; text-align: center; padding: 20px;">
         <h1>¡Gracias por tu compra, ${comprador}!</h1>
-        <p>Aquí están tus ${quantity} entrada(s) para KARMA. Presentá estos códigos en la puerta:</p>
+        <p>Aquí están tus ${totalTickets} entrada(s) para KARMA. Presentá estos códigos en la puerta:</p>
         ${qrHtmlSection}
         <p>¡Nos vemos en la pista!</p>
       </div>`;
