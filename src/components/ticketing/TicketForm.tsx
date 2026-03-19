@@ -12,6 +12,7 @@ export function TicketForm() {
   const [quantity, setQuantity] = useState(1);
 
   const [lotePrice, setLotePrice] = useState<number | null>(null);
+  const [activeLoteId, setActiveLoteId] = useState<number | null>(null); // EDITAR: Crear este estado para detectar el ID del lote
   const [priceLoading, setPriceLoading] = useState(true);
   const [priceError, setPriceError] = useState<string | null>(null);
 
@@ -27,6 +28,8 @@ export function TicketForm() {
         }
         
         const loteActivoNum = configSnap.data().loteActivo;
+        setActiveLoteId(loteActivoNum); 
+        
         const loteRef = doc(db, 'config', 'evento_actual', 'lotes', String(loteActivoNum));
         const loteSnap = await getDoc(loteRef);
 
@@ -46,6 +49,8 @@ export function TicketForm() {
 
     fetchActiveLotePrice();
   }, []);
+
+  const displayQuantity = activeLoteId === 6 ? quantity * 2 : quantity; // CREAR: Lógica para mostrar el doble si el lote es el 6
 
   const handleBuyTicket = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -87,7 +92,8 @@ export function TicketForm() {
     if (priceLoading) return 'Cargando...';
     if (isLoading) return 'Procesando...';
     if (!lotePrice) return 'Entradas no disponibles';
-    return `Pagar ${quantity * lotePrice} ARS`;
+    const ticketWord = displayQuantity === 1 ? 'entrada' : 'entradas';
+    return `Pagar ${quantity * lotePrice} ARS (${displayQuantity} ${ticketWord})`;  
   };
 
   return (
@@ -109,12 +115,16 @@ export function TicketForm() {
         required
       />
 
+<div className="flex flex-col items-center gap-2"> {/* Envoltura para centrar todo */}
       <div className="flex items-center justify-center gap-4 text-white">
         <button type="button" onClick={() => setQuantity(prev => Math.max(1, prev - 1))} className="text-2xl font-bold rounded-md bg-gray-800 border border-gray-700 w-10 h-10 flex items-center justify-center hover:bg-gray-700 transition-colors">-</button>
         <span className="text-2xl font-bold">{quantity}</span>
         <button type="button" onClick={() => setQuantity(prev => prev + 1)} className="text-2xl font-bold rounded-md bg-gray-800 border border-gray-700 w-10 h-10 flex items-center justify-center hover:bg-gray-700 transition-colors">+</button>
       </div>
-
+      {activeLoteId === 6 && (
+          <p className="text-sm text-orange-400 font-medium animate-pulse">¡Promo 2x1 Activa! Te llevás {displayQuantity} entradas.</p>
+        )}
+</div>
       {priceError && (
         <p className="text-red-500 text-sm">{priceError}</p>
       )}
