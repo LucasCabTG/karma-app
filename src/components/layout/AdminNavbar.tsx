@@ -8,53 +8,62 @@ import { auth } from '@/lib/firebase';
 
 export function AdminNavbar() {
   const router = useRouter();
-  const pathname = usePathname(); // Hook para saber qué página está activa
+  const pathname = usePathname();
 
-  // Lógica para desloguearse
   const handleLogout = async () => {
     await signOut(auth);
-    router.push('/login'); // Redirigimos al login después de cerrar sesión
+    router.push('/login');
   };
 
-  // Links de tu panel de admin
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard' },
-    { href: '/admin/config', label: 'Gestión de Lotes' },
+    { href: '/admin/config', label: 'Lotes' }, // Acortamos etiquetas para ganar espacio
     { href: '/admin/scanner', label: 'Escaner' },
-    { href: '/admin/courtesy', label: 'Entradas de Cortesía' },
-    { href: '/admin/lookup', label: 'Buscador Manual' }, 
+    { href: '/admin/courtesy', label: 'Cortesías' },
+    { href: '/admin/lookup', label: 'Buscador' }, 
   ];
 
   return (
-    <nav className="bg-gray-800 text-white p-4 sticky top-0 z-40 shadow-md">
-      <div className="max-w-7xl mx-auto flex justify-between items-center">
-        <div className="font-bold text-xl">
-          KARMA <span className="font-light text-green-400">| Panel Admin</span>
+    <nav className="bg-gray-800 text-white p-3 md:p-4 sticky top-0 z-40 shadow-md w-full">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+        
+        {/* LOGO / TÍTULO */}
+        <div className="font-bold text-lg md:text-xl flex items-center gap-2">
+          KARMA <span className="font-light text-green-400 text-sm md:text-base border-l border-gray-600 pl-2">Panel Admin</span>
         </div>
-        <div className="flex items-center gap-6">
-          {navLinks.map((link) => {
-            const isActive = pathname === link.href;
-            return (
-              <Link 
-                key={link.label} 
-                href={link.href}
-                className={`font-medium ${
-                  isActive 
-                    ? 'text-white border-b-2 border-green-400' 
-                    : 'text-gray-400 hover:text-white'
-                } transition-colors`}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
+
+        {/* CONTENEDOR DE LINKS Y BOTÓN */}
+        <div className="flex flex-wrap justify-center items-center gap-3 md:gap-6 w-full md:w-auto">
+          
+          {/* LINKS: En móvil se ven más chicos y se acomodan solos */}
+          <div className="flex flex-wrap justify-center gap-x-4 gap-y-2">
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link 
+                  key={link.label} 
+                  href={link.href}
+                  className={`text-xs md:text-sm font-medium transition-all ${
+                    isActive 
+                      ? 'text-green-400 border-b-2 border-green-400 pb-1' 
+                      : 'text-gray-400 hover:text-white'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* BOTÓN CERRAR SESIÓN: Más compacto en móvil */}
           <button 
             onClick={handleLogout}
-            className="bg-red-600 px-4 py-2 rounded-md font-bold text-sm hover:bg-red-500 transition-colors"
+            className="bg-red-600 px-3 py-1.5 md:px-4 md:py-2 rounded-md font-bold text-[10px] md:text-sm hover:bg-red-500 transition-colors uppercase md:normal-case"
           >
-            Cerrar Sesión
+            Salir
           </button>
         </div>
+
       </div>
     </nav>
   );
