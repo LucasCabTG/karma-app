@@ -15,7 +15,7 @@ export async function GET() {
 
   try {
     const ticketsRef = collection(db, 'individual_tickets');
-    const q = query(ticketsRef, where('evento', '==', 2));
+    const q = query(ticketsRef, where('evento', '==', 4));
     const snapshot = await getDocs(q);
 
     if (snapshot.empty) {
@@ -32,7 +32,7 @@ export async function GET() {
       const mailOptions = {
         from: '"KARMA SEASON" <karmaseason21@gmail.com>',
         to: ticket.email,
-        subject: '✨ ¡ESTA NOCHE! Tu acceso para KARMA Vol. 3 - Otoño',
+        subject: '✨ ¡ESTA NOCHE! Tu acceso para KARMA Vol. 4 - Dia del amigo',
         html: `
           <div style="background-color: #0a0a0a; color: #fff; font-family: sans-serif; padding: 40px; text-align: center;">
             <div style="max-width: 500px; margin: 0 auto; border: 1px solid #1f2937; padding: 20px; border-radius: 16px;">

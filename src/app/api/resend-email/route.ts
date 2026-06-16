@@ -22,6 +22,10 @@ export async function POST(req: NextRequest) {
 
     const { comprador, email, quantity } = orderDoc.data()!;
 
+    // Obtenemos la configuración para el texto del email
+    const configDocRef = await db.collection('config').doc('evento_actual').get();
+    const emailText = configDocRef.exists ? configDocRef.data()?.emailText : 'Aquí están de nuevo tus entradas:';
+
     // Sintaxis correcta para queries en el Admin SDK
     const individualTicketsRef = db.collection('individual_tickets');
     const q = individualTicketsRef.where('orderId', '==', orderId);
@@ -52,9 +56,10 @@ export async function POST(req: NextRequest) {
     }
 
     const emailHtml = `
-      <div style="font-family: sans-serif; text-align: center;">
+      <div style="font-family: sans-serif; text-align: center; padding: 20px;">
         <h1>Reenvío de tus entradas para KARMA</h1>
-        <p>Hola ${comprador}, aquí están de nuevo tus entradas:</p>
+        <p>Hola ${comprador},</p>
+        <p>${emailText}</p>
         ${qrHtmlSection}
         <p>¡Nos vemos en la pista!</p>
       </div>`;

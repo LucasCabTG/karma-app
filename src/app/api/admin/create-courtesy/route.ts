@@ -16,7 +16,11 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Transacción para crear la orden y actualizar stock
-    const orderId = await db.runTransaction(async (transaction) => {
+    const { orderId, emailText } = await db.runTransaction(async (transaction) => {
+      const configRef = db.collection('config').doc('evento_actual');
+      const configDoc = await transaction.get(configRef);
+      const emailText = configDoc.exists ? configDoc.data()?.emailText : 'Te enviamos tus entradas de cortesía para esta noche.';
+
       const loteRef = db.collection('config').doc('evento_actual').collection('lotes').doc(loteId.toString());
       const loteDoc = await transaction.get(loteRef);
 
@@ -34,13 +38,13 @@ export async function POST(req: NextRequest) {
         quantity: Number(quantity),
         fechaCompra: FieldValue.serverTimestamp(),
         status: 'paid',
-        evento: 2,
+        evento: 4,
         lote: Number(loteId),
         precio: 0
       });
 
       transaction.update(loteRef, { vendidas: FieldValue.increment(Number(quantity)) });
-      return newTicketRef.id;
+      return { orderId: newTicketRef.id, emailText };
     });
 
     // 2. Generar tickets individuales y QRs
@@ -54,7 +58,7 @@ export async function POST(req: NextRequest) {
         email: email,
         asistio: false,
         fechaGeneracion: FieldValue.serverTimestamp(),
-        evento: 2
+        evento: 4
       });
       
       const qrCodeDataURL = await QRCode.toDataURL(individualTicketRef.id);
@@ -87,11 +91,11 @@ export async function POST(req: NextRequest) {
     await transporter.sendMail({
       from: `"KARMA" <${process.env.GMAIL_USER}>`,
       to: email,
-      subject: '✨ Tus entradas de cortesía para KARMA Vol. 3',
+      subject: '✨ Tus entradas de cortesía para KARMA Vol. 4',
       html: `
         <div style="font-family: sans-serif; text-align: center; background-color: #f4f4f4; padding: 20px;">
           <h1>¡Hola, ${name}!</h1>
-          <p>Te enviamos tus entradas de cortesía para esta noche.</p>
+          <p>${emailText}</p>
           ${qrHtmlSection}
           <p>Presentá estos QRs en la puerta. ¡Nos vemos!</p>
         </div>`,

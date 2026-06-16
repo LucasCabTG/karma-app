@@ -12,9 +12,9 @@ async function recuperarTickets() {
   console.log("⏳ Iniciando recuperación de tickets individuales...");
 
   try {
-    // 1. Buscamos las órdenes pagadas del Evento 2
+    // 1. Buscamos las órdenes pagadas del Evento 4
     const ordersSnapshot = await db.collection('tickets')
-      .where('evento', '==', 2)
+      .where('evento', '==', 4)
       .where('status', '==', 'paid')
       .get();
 
@@ -42,7 +42,7 @@ async function recuperarTickets() {
           email: data.email,
           asistio: false,
           fechaGeneracion: data.fechaCompra || new Date(),
-          evento: 2
+          evento: 4
         });
         contador++;
       }

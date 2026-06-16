@@ -40,7 +40,7 @@ export async function POST(req: NextRequest) {
         quantity: quantity,
         fechaCompra: FieldValue.serverTimestamp(),
         status: 'pending',
-        evento: 2,
+        evento: 4,
         lote: loteActivoNum
       });
 
@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
         items: [
           {
             id: ticketId,
-            title: `x${quantity} Entrada(s) KARMA Vol. 2 (${loteActualNombre})`,
+            title: `x${quantity} Entrada(s) KARMA Vol. 4 (${loteActualNombre})`,
             quantity: quantity,
             unit_price: precioLote, // Usamos el precio dinámico del lote
             currency_id: 'ARS',

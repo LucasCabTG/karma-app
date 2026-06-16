@@ -6,7 +6,7 @@ export function Tickets() {
   return (
     <section id="tickets" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-md text-center">
-        <h2 className="text-4xl font-bold">Entradas Vol. 3: Otoño</h2>
+        <h2 className="text-4xl font-bold">Entradas Vol. 4: Dia del amigo</h2>
         <p className="mt-4 text-lg text-gray-400">
           Asegurá tu lugar para la próxima edición. La capacidad es limitada.
         </p>

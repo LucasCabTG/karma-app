@@ -20,7 +20,7 @@ export function Hero() {
         </p>
 
         <p className="mt-8 text-xl font-light text-gray-300">
-          Vol. 3: Otoño | 21.03.2026
+          Vol. 4: Dia del amigo | 18.07.2026
         </p>
 
 

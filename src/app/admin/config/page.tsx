@@ -15,6 +15,7 @@ interface Lote {
 
 export default function ConfigPage() {
   const [loteActivo, setLoteActivo] = useState(0);
+  const [emailText, setEmailText] = useState('');
   const [lotes, setLotes] = useState<Lote[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
@@ -29,7 +30,9 @@ export default function ConfigPage() {
       const configRef = doc(db, 'config', 'evento_actual');
       const configSnap = await getDoc(configRef);
       if (configSnap.exists()) {
-        setLoteActivo(configSnap.data().loteActivo);
+        const data = configSnap.data();
+        setLoteActivo(data.loteActivo);
+        setEmailText(data.emailText || '');
       }
 
       const lotesRef = collection(db, 'config', 'evento_actual', 'lotes');
@@ -48,14 +51,17 @@ export default function ConfigPage() {
     fetchConfig();
   }, []);
 
-  const handleSetLoteActivo = async () => {
-    setMessage('Guardando...');
+  const handleSaveGeneralConfig = async () => {
+    setMessage('Guardando configuración...');
     const configRef = doc(db, 'config', 'evento_actual');
     try {
-      await updateDoc(configRef, { loteActivo: Number(loteActivo) });
-      setMessage('¡Lote activo guardado!');
+      await updateDoc(configRef, { 
+        loteActivo: Number(loteActivo),
+        emailText: emailText
+      });
+      setMessage('¡Configuración general guardada!');
     } catch {
-      setMessage('Error al guardar.');
+      setMessage('Error al guardar configuración.');
     }
   };
 
@@ -112,26 +118,39 @@ export default function ConfigPage() {
 
   return (
     <div className="p-8 text-white max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6">Gestión de Lotes (Vol. 2)</h1>
+      <h1 className="text-3xl font-bold mb-6">Gestión de Lotes (Vol. 4)</h1>
       <p className="mb-4 text-red-400">{message}</p>
 
-      {/* --- SECCIÓN 1: ACTIVAR LOTE --- */}
+      {/* --- SECCIÓN 1: CONFIGURACIÓN GENERAL --- */}
       <div className="bg-gray-800 p-6 rounded-lg mb-6">
-        <h2 className="text-xl font-bold mb-4">Seleccionar Lote Activo</h2>
-        <div className="flex gap-4">
+        <h2 className="text-xl font-bold mb-4">Configuración General</h2>
+        
+        <div className="mb-6">
+          <label className="block text-sm text-gray-400 mb-2">Lote Activo para la Venta</label>
           <select 
             value={loteActivo} 
             onChange={(e) => setLoteActivo(Number(e.target.value))}
-            className="bg-gray-700 border border-gray-600 p-2 rounded-md text-white"
+            className="w-full bg-gray-700 border border-gray-600 p-2 rounded-md text-white"
           >
             {lotes.map(lote => (
               <option key={lote.id} value={lote.id}>{lote.nombre} ({lote.precio} ARS)</option>
             ))}
           </select>
-          <button onClick={handleSetLoteActivo} className="bg-blue-600 px-4 py-2 rounded-md font-bold hover:bg-blue-500">
-            Activar Lote
-          </button>
         </div>
+
+        <div className="mb-6">
+          <label className="block text-sm text-gray-400 mb-2">Texto Personalizado para el Email (arriba del QR)</label>
+          <textarea 
+            value={emailText}
+            onChange={(e) => setEmailText(e.target.value)}
+            placeholder="Tu lugar para KARMA Vol. 4 está confirmado. Presentá los siguientes códigos QR en la entrada..."
+            className="w-full bg-gray-700 border border-gray-600 p-2 rounded-md text-white h-32"
+          />
+        </div>
+
+        <button onClick={handleSaveGeneralConfig} className="bg-blue-600 px-6 py-2 rounded-md font-bold hover:bg-blue-500 w-full">
+          Guardar Configuración General
+        </button>
       </div>
 
       {/* --- SECCIÓN 2: EDITAR LOTES EXISTENTES --- */}

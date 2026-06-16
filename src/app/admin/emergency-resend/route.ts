@@ -15,9 +15,9 @@ export async function GET() {
   });
 
   try {
-    // 1. Buscamos los tickets del Evento 2 (Karma Vol. 3)
+    // 1. Buscamos los tickets del Evento 4 (Karma Vol. 4)
     const snapshot = await db.collection('individual_tickets')
-      .where('evento', '==', 2)
+      .where('evento', '==', 4)
       .get();
 
     if (snapshot.empty) {
@@ -36,7 +36,7 @@ export async function GET() {
       const mailOptions = {
         from: '"KARMA SEASON" <karmaseason21@gmail.com>',
         to: ticket.email,
-        subject: '✨ ¡ESTA NOCHE! Tu acceso para KARMA Vol. 3 - Otoño',
+        subject: '✨ ¡ESTA NOCHE! Tu acceso para KARMA Vol. 4 - Dia del amigo',
         html: `
           <div style="background-color: #0a0a0a; color: #fff; font-family: sans-serif; padding: 40px; text-align: center;">
             <div style="max-width: 500px; margin: 0 auto; border: 1px solid #1f2937; padding: 20px; border-radius: 16px;">

@@ -59,7 +59,7 @@ export default function ScannerPage() {
 
   return (
     <div className="flex flex-col items-center p-4 bg-gray-900 min-h-screen text-white">
-      <h1 className="text-xl font-bold mb-4">Escáner Karma Vol. 3</h1>
+      <h1 className="text-xl font-bold mb-4">Escáner Karma Vol. 4</h1>
       
       <div id="reader" className="w-full max-w-sm border-2 border-gray-700 rounded-lg overflow-hidden bg-gray-950 p-2 text-center html5-qrcode-overrides"></div>
 

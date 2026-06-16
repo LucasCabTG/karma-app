@@ -9,7 +9,7 @@ const videos = [
   {
     title: 'Eloy V B2B Cristian Aranda',
     subtitle: 'Progressive House Set – Summer Edition',
-    description: 'Reviví la magia del Vol. 2. Un B2B increible capturado en nuestro ultimo evento',
+    description: 'Reviví la magia del Vol. 3. Un B2B increible capturado en nuestro ultimo evento',
     videoUrl: 'https://www.youtube.com/embed/3vrKX99y0_Q?si=YJ7KGPZkIkA2ln3e' 
   },
   // CUANDO TENGAS LOS OTROS VIDEOS, COPIA Y PEGA ESTO:
@@ -39,9 +39,9 @@ export function Music() {
   return (
     <section id="music" className="bg-black py-20 px-4 text-white">
       <div className="mx-auto max-w-3xl text-center">
-        <h2 className="text-4xl font-bold">Recordá el Sonido del Verano</h2>
+        <h2 className="text-4xl font-bold">Recordá el Sonido de Otoño</h2>
         <p className="mt-4 text-lg text-gray-400">
-          Reviví los sets que definieron el Vol. 2. La energía de la fiesta, ahora disponible para escuchar donde quieras.
+          Reviví los sets que definieron el Vol. 3. La energía de la fiesta, ahora disponible para escuchar donde quieras.
         </p>
       </div>
 

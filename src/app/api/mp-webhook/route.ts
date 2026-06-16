@@ -25,6 +25,10 @@ async function sendTicketEmail(orderData: OrderData, orderId: string) {
   const multiplier = (lote === 6) ? 2 : 1;
   const totalTickets = quantity * multiplier;
 
+  // Obtenemos la configuración para el texto del email
+  const configDoc = await db.collection('config').doc('evento_actual').get();
+  const customText = configDoc.exists ? configDoc.data()?.emailText : undefined;
+
   const attachments = [];
   const qrCodeImages: string[] = [];
 
@@ -33,7 +37,7 @@ async function sendTicketEmail(orderData: OrderData, orderId: string) {
       orderId: orderId,
       comprador, email, asistio: false,
       fechaGeneracion: FieldValue.serverTimestamp(),
-      evento: 2
+      evento: 4
     });
     
     const qrCodeDataURL = await QRCode.toDataURL(individualTicketRef.id);
@@ -48,7 +52,7 @@ async function sendTicketEmail(orderData: OrderData, orderId: string) {
     });
   }
 
-  const emailHtml = await render(TicketEmail({ buyerName: comprador, qrCodeImages }));
+  const emailHtml = await render(TicketEmail({ buyerName: comprador, qrCodeImages, customText }));
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',

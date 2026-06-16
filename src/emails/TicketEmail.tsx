@@ -17,6 +17,7 @@ import * as React from 'react';
 interface TicketEmailProps {
   buyerName: string;
   qrCodeImages: string[]; // Un array de imágenes de QR en formato base64
+  customText?: string;
 }
 
 const main = {
@@ -53,6 +54,7 @@ const qrCodeImg = {
 export const TicketEmail = ({
   buyerName = 'Asistente',
   qrCodeImages = [],
+  customText,
 }: TicketEmailProps) => (
   <Html>
     <Head />
@@ -61,8 +63,7 @@ export const TicketEmail = ({
       <Container style={container}>
         <Heading style={heading}>¡Gracias por tu compra, {buyerName}!</Heading>
         <Text style={text}>
-          Tu lugar para KARMA Vol. 1: Primavera está confirmado.
-          Presentá los siguientes códigos QR en la entrada del evento. Cada código es válido para una sola persona.
+          {customText || 'Tu lugar para KARMA está confirmado. Presentá los siguientes códigos QR en la entrada del evento. Cada código es válido para una sola persona.'}
         </Text>
         
         {/* Aquí mapeamos y mostramos cada uno de los QRs */}

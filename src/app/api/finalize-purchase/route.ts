@@ -37,6 +37,10 @@ export async function POST(req: NextRequest) {
     const multiplier = (lote === 6) ? 2 : 1; 
     const totalTickets = quantity * multiplier;   
      
+    // Obtenemos la configuración para el texto del email
+    const configDocRef = await db.collection('config').doc('evento_actual').get();
+    const emailText = configDocRef.exists ? configDocRef.data()?.emailText : `Aquí están tus ${totalTickets} entrada(s) para KARMA. Presentá estos códigos en la puerta:`;
+
     // --- LÓGICA CORRECTA PARA ADJUNTAR IMÁGENES ---
     const attachments = [];
     let qrHtmlSection = '';
@@ -47,6 +51,7 @@ export async function POST(req: NextRequest) {
         orderId: orderDoc.id,
         comprador, email, asistio: false, 
         fechaGeneracion: FieldValue.serverTimestamp(),
+        evento: 4
       });
       
       // Generamos la imagen del QR
@@ -72,7 +77,7 @@ export async function POST(req: NextRequest) {
     const emailHtml = `
       <div style="font-family: sans-serif; text-align: center; padding: 20px;">
         <h1>¡Gracias por tu compra, ${comprador}!</h1>
-        <p>Aquí están tus ${totalTickets} entrada(s) para KARMA. Presentá estos códigos en la puerta:</p>
+        <p>${emailText}</p>
         ${qrHtmlSection}
         <p>¡Nos vemos en la pista!</p>
       </div>`;
