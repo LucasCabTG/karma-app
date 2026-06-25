@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 // CORRECCIÓN: 'collection' eliminado de esta lista
 import { doc, getDoc } from 'firebase/firestore'; 
+import { calcularPrecioTotal } from '@/lib/pricing';
 
 export function TicketForm() {
   const [name, setName] = useState('');
@@ -11,7 +12,7 @@ export function TicketForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [quantity, setQuantity] = useState(1);
 
-  const [lotePrice, setLotePrice] = useState<number | null>(null);
+  const [activeLote, setActiveLote] = useState<{ precio: number; preciosPorCantidad?: { [cantidad: string]: number } } | null>(null);
   const [activeLoteId, setActiveLoteId] = useState<number | null>(null); // EDITAR: Crear este estado para detectar el ID del lote
   const [priceLoading, setPriceLoading] = useState(true);
   const [priceError, setPriceError] = useState<string | null>(null);
@@ -37,7 +38,11 @@ export function TicketForm() {
           throw new Error("No se pudo encontrar el lote de entradas activo.");
         }
 
-        setLotePrice(loteSnap.data().precio);
+        const data = loteSnap.data();
+        setActiveLote({
+          precio: data.precio,
+          preciosPorCantidad: data.preciosPorCantidad || {}
+        });
         
       } catch (err) { // CORRECCIÓN: Quitamos el 'any'
         console.error("Error al cargar el precio:", err);
@@ -51,6 +56,8 @@ export function TicketForm() {
   }, []);
 
   const displayQuantity = activeLoteId === 6 ? quantity * 2 : quantity; // CREAR: Lógica para mostrar el doble si el lote es el 6
+
+  const totalPrice = activeLote ? calcularPrecioTotal(quantity, activeLote.precio, activeLote.preciosPorCantidad) : 0;
 
   const handleBuyTicket = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -91,9 +98,9 @@ export function TicketForm() {
   const getButtonText = () => {
     if (priceLoading) return 'Cargando...';
     if (isLoading) return 'Procesando...';
-    if (!lotePrice) return 'Entradas no disponibles';
+    if (!activeLote) return 'Entradas no disponibles';
     const ticketWord = displayQuantity === 1 ? 'entrada' : 'entradas';
-    return `Pagar ${quantity * lotePrice} ARS (${displayQuantity} ${ticketWord})`;  
+    return `Pagar ${totalPrice} ARS (${displayQuantity} ${ticketWord})`;  
   };
 
   return (
@@ -131,7 +138,7 @@ export function TicketForm() {
       
       <button 
         type="submit"
-        disabled={isLoading || priceLoading || !lotePrice}
+        disabled={isLoading || priceLoading || !activeLote}
         className="rounded-lg bg-white px-6 py-3 font-bold text-black transition-all duration-200 hover:bg-gray-300 hover:scale-105 active:scale-95 disabled:bg-gray-500"
       >
         {getButtonText()}

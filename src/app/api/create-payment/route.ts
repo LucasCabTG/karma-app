@@ -4,13 +4,14 @@ import { NextRequest, NextResponse } from 'next/server';
 import { MercadoPagoConfig, Preference } from 'mercadopago';
 import { db } from '@/lib/firebase-admin';
 import { FieldValue } from 'firebase-admin/firestore';
+import { calcularPrecioTotal } from '@/lib/pricing';
 
 export async function POST(req: NextRequest) {
   try {
     const { name, email, quantity } = await req.json();
 
     // 1. La transacción ahora devolverá los valores que necesitamos.
-    const { ticketId, precioLote, loteActualNombre } = await db.runTransaction(async (transaction) => {
+    const { ticketId, precioTotal, loteActualNombre } = await db.runTransaction(async (transaction) => {
       const configRef = db.collection('config').doc('evento_actual');
       const configDoc = await transaction.get(configRef);
 
@@ -26,18 +27,21 @@ export async function POST(req: NextRequest) {
         throw new Error(`Configuración para el Lote ${loteActivoNum} no encontrada.`);
       }
 
-      const { vendidas, limite, precio, nombre } = loteDoc.data()!;
+      const { vendidas, limite, precio, nombre, preciosPorCantidad } = loteDoc.data()!;
       
       if (vendidas + quantity > limite) {
         const entradasDisponibles = limite - vendidas;
         throw new Error(`¡Stock Agotado para ${nombre}! Solo quedan ${entradasDisponibles} entradas.`);
       }
 
+      const calculatedTotalPrice = calcularPrecioTotal(quantity, precio, preciosPorCantidad);
+
       const newTicketRef = db.collection("tickets").doc();
       transaction.set(newTicketRef, {
         comprador: name,
         email: email,
         quantity: quantity,
+        precioTotal: calculatedTotalPrice,
         fechaCompra: FieldValue.serverTimestamp(),
         status: 'pending',
         evento: 4,
@@ -49,12 +53,12 @@ export async function POST(req: NextRequest) {
       // 2. Devolvemos un objeto con los datos que necesitamos fuera de la transacción.
       return { 
         ticketId: newTicketRef.id, 
-        precioLote: precio, 
+        precioTotal: calculatedTotalPrice, 
         loteActualNombre: nombre 
       };
     });
 
-    // 3. Si llegamos aquí, ticketId, precioLote y loteActualNombre SÍ existen.
+    // 3. Si llegamos aquí, ticketId, precioTotal y loteActualNombre SÍ existen.
     
     const client = new MercadoPagoConfig({ accessToken: process.env.MERCADO_PAGO_ACCESS_TOKEN! });
     const preference = new Preference(client);
@@ -65,8 +69,8 @@ export async function POST(req: NextRequest) {
           {
             id: ticketId,
             title: `x${quantity} Entrada(s) KARMA Vol. 4 (${loteActualNombre})`,
-            quantity: quantity,
-            unit_price: precioLote, // Usamos el precio dinámico del lote
+            quantity: 1, // Usamos 1 como cantidad para enviar el precio total exacto
+            unit_price: precioTotal, // Usamos el precio dinámico calculado
             currency_id: 'ARS',
           },
         ],
