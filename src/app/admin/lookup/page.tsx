@@ -23,11 +23,31 @@ interface IndividualTicket {
 
 export default function LookupPage() {
   const [searchTerm, setSearchTerm] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [message, setMessage] = useState('');
   
   const [allTickets, setAllTickets] = useState<IndividualTicket[]>([]);
   const [filteredTickets, setFilteredTickets] = useState<IndividualTicket[]>([]);
+
+  const formatFecha = (timestamp?: Timestamp) => {
+    if (!timestamp) return '-';
+    const date = timestamp.toDate();
+    return date.toLocaleString('es-AR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setStartDate('');
+    setEndDate('');
+  };
 
   useEffect(() => {
     const fetchAllTickets = async () => {
@@ -63,20 +83,36 @@ export default function LookupPage() {
   }, []);
 
   useEffect(() => {
-    const term = searchTerm.toLowerCase().trim();
+    let filtered = allTickets;
 
-    if (!term) {
-      setFilteredTickets(allTickets);
-      return;
+    const term = searchTerm.toLowerCase().trim();
+    if (term) {
+      filtered = filtered.filter(ticket => 
+        ticket.comprador.toLowerCase().includes(term) ||
+        ticket.email.toLowerCase().includes(term)
+      );
     }
 
-    const filtered = allTickets.filter(ticket => 
-      ticket.comprador.toLowerCase().includes(term) ||
-      ticket.email.toLowerCase().includes(term)
-    );
+    if (startDate) {
+      const start = new Date(startDate + 'T00:00:00');
+      filtered = filtered.filter(ticket => {
+        if (!ticket.fechaGeneracion) return false;
+        const ticketDate = ticket.fechaGeneracion.toDate();
+        return ticketDate >= start;
+      });
+    }
+
+    if (endDate) {
+      const end = new Date(endDate + 'T23:59:59');
+      filtered = filtered.filter(ticket => {
+        if (!ticket.fechaGeneracion) return false;
+        const ticketDate = ticket.fechaGeneracion.toDate();
+        return ticketDate <= end;
+      });
+    }
 
     setFilteredTickets(filtered);
-  }, [searchTerm, allTickets]);
+  }, [searchTerm, startDate, endDate, allTickets]);
 
   const handleManualValidation = async (ticketId: string) => {
     setIsLoading(true);
@@ -103,17 +139,53 @@ export default function LookupPage() {
   };
 
   return (
-    <div className="p-4 md:p-8 text-white max-w-4xl mx-auto"> {/* Ajustamos padding para móvil */}
+    <div className="p-4 md:p-8 text-white max-w-4xl mx-auto">
       <h1 className="text-2xl md:text-3xl font-bold mb-6">Buscador Manual</h1>
 
-      <div className="mb-6">
-        <input
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar por Email o Nombre..."
-          className="w-full bg-gray-700 border border-gray-600 p-4 rounded-md text-white placeholder-gray-400 text-lg" // Input más grande para dedos en móvil
-        />
+      {/* --- PANEL DE FILTROS --- */}
+      <div className="bg-gray-800 p-4 md:p-6 rounded-xl border border-gray-700 shadow-lg mb-6 flex flex-col gap-4">
+        {/* Búsqueda por Texto */}
+        <div>
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            placeholder="Buscar por Email o Nombre..."
+            className="w-full bg-gray-900 border border-gray-700 p-4 rounded-lg text-white placeholder-gray-400 text-base md:text-lg focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+        {/* Filtros por Fecha y Reset */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4">
+          <div className="flex-1">
+            <label className="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Fecha Desde</label>
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="w-full bg-gray-900 border border-gray-700 p-3 rounded-lg text-white text-sm outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all cursor-pointer"
+            />
+          </div>
+
+          <div className="flex-1">
+            <label className="block text-xs font-semibold uppercase text-gray-400 mb-1.5">Fecha Hasta</label>
+            <input
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="w-full bg-gray-900 border border-gray-700 p-3 rounded-lg text-white text-sm outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 transition-all cursor-pointer"
+            />
+          </div>
+
+          {(searchTerm || startDate || endDate) && (
+            <button
+              onClick={handleClearFilters}
+              className="w-full md:w-auto bg-gray-700 hover:bg-gray-600 text-white font-semibold py-3 px-6 rounded-lg text-sm transition-all hover:scale-[1.02] active:scale-[0.98] h-[46px] flex items-center justify-center whitespace-nowrap md:mt-5"
+            >
+              Limpiar Filtros
+            </button>
+          )}
+        </div>
       </div>
 
       {message && <p className="text-gray-400 mb-4 bg-gray-900/50 p-2 rounded text-sm">{message}</p>}
@@ -139,8 +211,9 @@ export default function LookupPage() {
                     )}
                   </div>
                   
-                  <div className="text-[10px] font-mono text-gray-500 mt-1">
-                    ID: {ticket.id}
+                  <div className="flex justify-between items-center text-[10px] font-mono text-gray-500 mt-1">
+                    <span>ID: {ticket.id.substring(0, 8)}...</span>
+                    <span>{formatFecha(ticket.fechaGeneracion)}</span>
                   </div>
 
                   <button
@@ -165,6 +238,7 @@ export default function LookupPage() {
                   <tr>
                     <th className="p-4">Comprador</th>
                     <th className="p-4">Email</th>
+                    <th className="p-4">Fecha Compra</th>
                     <th className="p-4">Estado</th>
                     <th className="p-4 text-right">Acción</th>
                   </tr>
@@ -177,6 +251,9 @@ export default function LookupPage() {
                         <p className="text-xs text-gray-500 font-mono">{ticket.id.substring(0, 8)}...</p>
                       </td>
                       <td className="p-4 text-gray-300">{ticket.email}</td>
+                      <td className="p-4 text-gray-300 text-sm">
+                        {formatFecha(ticket.fechaGeneracion)}
+                      </td>
                       <td className="p-4">
                         {ticket.asistio ? (
                           <span className="bg-yellow-500 text-black px-2 py-1 rounded-full text-xs font-bold">YA USADO</span>
