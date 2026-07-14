@@ -5,11 +5,15 @@ import { getFirestore } from 'firebase-admin/firestore';
 
 if (!admin.apps.length) {
   try {
-    // CAMBIO CLAVE: Leemos la variable correcta
-    const serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+    let serviceAccountJson = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
+
+    // Soporte para cargar la clave codificada en Base64 como fallback
+    if (!serviceAccountJson && process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+      serviceAccountJson = Buffer.from(process.env.FIREBASE_SERVICE_ACCOUNT_BASE64, 'base64').toString('utf-8');
+    }
 
     if (!serviceAccountJson) {
-      throw new Error('Variable FIREBASE_SERVICE_ACCOUNT_KEY no está definida.');
+      throw new Error('Ni FIREBASE_SERVICE_ACCOUNT_KEY ni FIREBASE_SERVICE_ACCOUNT_BASE64 están definidas.');
     }
 
     const serviceAccount = JSON.parse(serviceAccountJson);
@@ -22,6 +26,12 @@ if (!admin.apps.length) {
   }
 }
 
-const db = getFirestore();
+let db: admin.firestore.Firestore;
+try {
+  db = getFirestore();
+} catch (error) {
+  console.warn('Advertencia: No se pudo obtener la base de datos de Firestore. Usando mock durante la compilación.');
+  db = {} as admin.firestore.Firestore;
+}
 
 export { db };

@@ -10,6 +10,10 @@ export async function POST(req: NextRequest) {
   try {
     const { name, email, quantity } = await req.json();
 
+    const host = req.headers.get('host') || 'karmaseason.com.ar';
+    const protocol = req.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = `${protocol}://${host}`;
+
     // 1. La transacción ahora devolverá los valores que necesitamos.
     const { ticketId, precioTotal, loteActualNombre } = await db.runTransaction(async (transaction) => {
       const configRef = db.collection('config').doc('evento_actual');
@@ -76,9 +80,9 @@ export async function POST(req: NextRequest) {
         ],
         payer: { name, email },
         back_urls: {
-          success: `${process.env.BASE_URL}/success`,
-          failure: `${process.env.BASE_URL}/failure`,
-          pending: `${process.env.BASE_URL}/pending`
+          success: `${baseUrl}/success`,
+          failure: `${baseUrl}/failure`,
+          pending: `${baseUrl}/pending`
         },
         external_reference: ticketId,
       },
